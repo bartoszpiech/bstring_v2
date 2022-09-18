@@ -2,11 +2,9 @@
 #include "bstring.h"
 
 int main() {
-    bstr c = bstr_cstr("aao123b.23o345eu");
-    bstr d = bstr_sub_left(c, 6);
-    bstr_print_dbg(c);
-    bstr_print_dbg(d);
-    printf("%f\n", bstr_to_double(c));
-    printf("%f\n", bstr_to_double(d));
+    bstr c = bstr_cstr("brzeczyszczykiewicz");
+    bstr_print_dbg(bstr_without_prefix(c, bstr_cstr("brze")));
+    bstr_print_dbg(bstr_chop(&c, bstr_cstr("czy")));
+    bstr_print_dbg(bstr_chop(&c, "czy"));
     return 0;
 }

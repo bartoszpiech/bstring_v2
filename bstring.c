@@ -120,7 +120,17 @@ bstr bstr_sub_right(bstr string, size_t amount) {
     };
 }
 
-bstr bstr_chop(bstr *string, bstr delim) {
+bstr bstr_substr(bstr string, size_t begin, size_t end) {
+    if (begin > string.size || end > string.size || begin > end) {
+        return (bstr) { 0, "" };
+    }
+    return (bstr) {
+        .size = end - begin + 1,
+        .data = &string.data[begin]
+    };
+}
+
+bstr bstr_chop_impl(bstr *string, bstr delim) {
     int ind = bstr_index(*string, delim);
     if (ind == -1) {
         return *string;
@@ -145,6 +155,26 @@ bool bstr_ends_with(bstr string, bstr suffix) {
     string.data = &string.data[string.size - suffix.size];
     string.size = suffix.size;
     return bstr_index(string, suffix) == 0;
+}
+
+bstr bstr_without_prefix(bstr string, bstr prefix) {
+    if (!bstr_starts_with(string, prefix)) {
+        return string;
+    }
+    return (bstr) {
+        .size = string.size - prefix.size,
+        .data = &string.data[prefix.size]
+    };
+}
+
+bstr bstr_without_suffix(bstr string, bstr suffix) {
+    if (!bstr_ends_with(string, suffix)) {
+        return string;
+    }
+    return (bstr) {
+        .size = string.size - suffix.size,
+        .data = string.data
+    };
 }
 
 double bstr_to_double(bstr string) {
@@ -174,3 +204,15 @@ double bstr_to_double(bstr string) {
     }
     return res * minus;
 }
+
+/*
+bstr bstr_reverse(bstr string) {
+    bstr res = string;
+    bstr_print_dbg(res);
+    for (int i = 0; i < string.size; i++) {
+        res.data[i] = 'X';
+        bstr_print_dbg(res);
+    }
+    return res;
+}
+*/
