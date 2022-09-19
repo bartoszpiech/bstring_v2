@@ -130,7 +130,7 @@ bstr bstr_substr(bstr string, size_t begin, size_t end) {
     };
 }
 
-bstr bstr_chop_impl(bstr *string, bstr delim) {
+bstr bstr_chop_impl1(bstr *string, bstr delim) {
     int ind = bstr_index(*string, delim);
     if (ind == -1) {
         return *string;
@@ -142,6 +142,10 @@ bstr bstr_chop_impl(bstr *string, bstr delim) {
     string->size -= ind + delim.size;
     string->data = &string->data[ind + delim.size];
     return res;
+}
+
+bstr bstr_chop_impl2(bstr *string, const char *delim) {
+    return bstr_chop_impl1(string, bstr_cstr(delim));
 }
 
 bool bstr_starts_with(bstr string, bstr prefix) {
