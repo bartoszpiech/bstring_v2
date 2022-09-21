@@ -15,6 +15,7 @@ size_t cstrlen(const char *cstr) {
     return n;
 }
 
+/* bstr */
 bstr bstr_cstr(const char *cstr) {
     return (bstr) { cstrlen(cstr), (char *)cstr };
 }
@@ -209,14 +210,48 @@ double bstr_to_double(bstr string) {
     return res * minus;
 }
 
-/*
-bstr bstr_reverse(bstr string) {
-    bstr res = string;
-    bstr_print_dbg(res);
-    for (int i = 0; i < string.size; i++) {
-        res.data[i] = 'X';
-        bstr_print_dbg(res);
+/* bstrbuf */
+bstrbuf bstrbuf_make(size_t initial_capacity, alloc allocator) {
+    bstrbuf result = { 0 };
+    char *data = allocator.malloc(initial_capacity);
+    if (data) {
+        result.data = data;
+        result.cap = initial_capacity;
+        result.alloc = allocator;
+        result.valid = true;
     }
-    return res;
+    return result;
 }
-*/
+
+void bstrbuf_free(bstrbuf *string_buffer) {
+    if (!string_buffer->valid) {
+        return;
+    }
+    string_buffer->alloc.free(string_buffer->data);
+}
+
+void bstrbuf_append(bstrbuf *string_buffer, bstr string) {
+    if (!string_buffer->valid) {
+        return;
+    }
+    printf("%ld %ld %ld\n", string_buffer->cap, string_buffer->size, string.size);
+    /* there might be change here because increasing memory is costly */
+    while (string_buffer->cap - string_buffer->size < string.size) {
+        string_buffer->cap *= BSTRBUF_REALLOC_INC;
+        string_buffer->data = string_buffer->alloc.realloc(
+                string_buffer->data,
+                string_buffer->cap);
+        if (!string_buffer->data) {
+            string_buffer->valid = false;
+            return;
+        }
+    }
+    for (size_t i = 0; i < string.size; i++) {
+        string_buffer->data[string_buffer->size + i] = string.data[i];
+    }
+    string_buffer->size += string.size;
+}
+
+void bstrbuf_print(const bstrbuf b) {
+    printf("%s"bstr_fmt"\n", b.valid ? "(valid)" : "(invalid)", bstr_arg(b));
+}
