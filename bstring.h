@@ -43,7 +43,6 @@ void    bstr_print_dbg(const bstr);
 size_t  bstr_strlen(bstr string);
 bool    bstr_eq(bstr a, bstr b);
 bool    bstr_eq_ignorecase(bstr a, bstr b);
-bool    bstr_contains(bstr a, bstr b);
 bool    bstr_contains(bstr string, bstr substring);
 int     bstr_index(bstr string, bstr substring);
 bstr    bstr_trim_left(bstr string);
@@ -67,8 +66,12 @@ bstr    bstr_chop_impl2(bstr *string, const char *delim);
 
 /* bstrbuf */
 bstrbuf bstrbuf_make(size_t initial_capacity, alloc allocator);
-void bstrbuf_free(bstrbuf *string_buffer);
-void bstrbuf_append(bstrbuf *string_buffer, bstr string);
-void bstrbuf_print(const bstrbuf b);
+bstrbuf bstrbuf_copy(bstrbuf buffer, alloc allocator);
+void    bstrbuf_free(bstrbuf *string_buffer);
+void    bstrbuf_append(bstrbuf *string_buffer, bstr string);
+void    bstrbuf_insert(bstrbuf *string_buffer, bstr string, size_t index);
+void    bstrbuf_remove(bstrbuf *string_buffer, size_t from, size_t to);
+void    bstrbuf_print(const bstrbuf b);
+bstr    bstrbuf_to_bstr(const bstrbuf b);  /* beware freeing bstrbuf makes bstr owned */
 
 #endif // _BSTRING_H_

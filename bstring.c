@@ -213,12 +213,21 @@ double bstr_to_double(bstr string) {
 /* bstrbuf */
 bstrbuf bstrbuf_make(size_t initial_capacity, alloc allocator) {
     bstrbuf result = { 0 };
-    char *data = allocator.malloc(initial_capacity);
+    void *data = allocator.malloc(initial_capacity);
     if (data) {
         result.data = data;
         result.cap = initial_capacity;
         result.alloc = allocator;
         result.valid = true;
+    }
+    return result;
+}
+
+bstrbuf bstrbuf_copy(bstrbuf buffer, alloc allocator) {
+    bstrbuf result = { 0 };
+    if (buffer.valid) {
+        result = bstrbuf_make(buffer.cap, allocator);
+        bstrbuf_append(&result, bstrbuf_to_bstr(buffer));
     }
     return result;
 }
@@ -230,28 +239,74 @@ void bstrbuf_free(bstrbuf *string_buffer) {
     string_buffer->alloc.free(string_buffer->data);
 }
 
-void bstrbuf_append(bstrbuf *string_buffer, bstr string) {
+void bstrbuf_inc_to_fit(bstrbuf *string_buffer, size_t size_to_fit) {
     if (!string_buffer->valid) {
         return;
     }
-    printf("%ld %ld %ld\n", string_buffer->cap, string_buffer->size, string.size);
-    /* there might be change here because increasing memory is costly */
-    while (string_buffer->cap - string_buffer->size < string.size) {
-        string_buffer->cap *= BSTRBUF_REALLOC_INC;
-        string_buffer->data = string_buffer->alloc.realloc(
-                string_buffer->data,
-                string_buffer->cap);
-        if (!string_buffer->data) {
-            string_buffer->valid = false;
-            return;
-        }
+    string_buffer->cap = size_to_fit + string_buffer->size;
+    string_buffer->data = string_buffer->alloc.realloc(
+            string_buffer->data,
+            string_buffer->cap);
+    if (!string_buffer->data) {
+        string_buffer->valid = false;
+        return;
     }
-    for (size_t i = 0; i < string.size; i++) {
-        string_buffer->data[string_buffer->size + i] = string.data[i];
+}
+
+void bstrbuf_append(bstrbuf *string_buffer, bstr string) {
+    if (string_buffer->cap - string_buffer->size < string.size) {
+        bstrbuf_inc_to_fit(string_buffer, string.size);
     }
+    if (!string_buffer->valid) {
+        return;
+    }
+    memcpy(&string_buffer->data[string_buffer->size], string.data, string.size);
     string_buffer->size += string.size;
+}
+
+void bstrbuf_insert(bstrbuf *string_buffer, bstr string, size_t index) {
+    bstrbuf_inc_to_fit(string_buffer, string.size);
+    if (index < 0) {
+        index = 0;
+    } else if (index > string_buffer->size) {
+        index = string_buffer->size;
+    }
+    if (!string_buffer->valid) {
+        return;
+    }
+    memmove(&string_buffer->data[index + string.size], &string_buffer->data[index], string_buffer->size - index);
+    memmove(&string_buffer->data[index], string.data, string.size);
+    string_buffer->size += string.size;
+}
+
+void bstrbuf_remove(bstrbuf *string_buffer, size_t from, size_t to) {
+    if (!string_buffer->valid) {
+        return;
+    }
+    /* safer execution of the function */
+    if (from >= to) {
+        size_t tmp = from;
+        from = to;
+        to = tmp;
+    }
+    if (from < 0) {
+        from = 0;
+    } else if (to > string_buffer->size) {
+        to = string_buffer->size;
+    }
+    memmove(&string_buffer->data[from], &string_buffer->data[to], string_buffer->size - to);
+    string_buffer->size -= to - from;
 }
 
 void bstrbuf_print(const bstrbuf b) {
     printf("%s"bstr_fmt"\n", b.valid ? "(valid)" : "(invalid)", bstr_arg(b));
+}
+
+bstr bstrbuf_to_bstr(const bstrbuf b) {
+    bstr result = { 0 };
+    if (b.valid) {
+        result.size = b.size;
+        result.data = b.data;
+    }
+    return result;
 }

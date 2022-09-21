@@ -26,15 +26,21 @@ alloc myalloc = {
 };
 
 int main() {
-    bstr c = bstr_cstr("brzeczyszczykiewicz");
+    bstr c = bstr_cstr("alamakota");
     bstrbuf buffer = bstrbuf_make(2, myalloc);
+    bstrbuf b2 = bstrbuf_copy(buffer, myalloc);
+    bstrbuf_append(&buffer, c);
+    bstr_print(c);
     bstrbuf_print(buffer);
-    bstrbuf_append(&buffer, c);
-    bstrbuf_append(&buffer, c);
-    bstrbuf_append(&buffer, c);
-    bstrbuf_append(&buffer, c);
+    bstrbuf_print(b2);
+
+
+    buffer.data[0] = 'X';
+    b2.data[0] = 'Y';
     bstrbuf_print(buffer);
-    
+    bstrbuf_print(b2);
+
     bstrbuf_free(&buffer);
+    bstrbuf_free(&b2);
     return 0;
 }
