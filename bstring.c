@@ -32,6 +32,10 @@ size_t bstr_strlen(bstr string) {
     return string.size;
 }
 
+bool bstr_valid(bstr string) {
+    return string.size != 0 && string.data;
+}
+
 bool bstr_eq(bstr a, bstr b) {
     if (a.size != b.size) {
         return false;
@@ -133,15 +137,16 @@ bstr bstr_substr(bstr string, size_t begin, size_t end) {
 
 bstr bstr_chop_impl1(bstr *string, bstr delim) {
     int ind = bstr_index(*string, delim);
-    if (ind == -1) {
-        return *string;
+    bstr res = { 0 };
+    if (ind != -1) {
+        res.size = ind,
+        res.data = string->data,
+        string->size -= ind + delim.size;
+        string->data = &string->data[ind + delim.size];
+    } else {
+        res = *string;
+        *string = (bstr) { 0 };
     }
-    bstr res = {
-        .size = ind,
-        .data = string->data,
-    };
-    string->size -= ind + delim.size;
-    string->data = &string->data[ind + delim.size];
     return res;
 }
 
@@ -239,6 +244,10 @@ void bstrbuf_free(bstrbuf *string_buffer) {
     string_buffer->alloc.free(string_buffer->data);
 }
 
+size_t bstrbuf_space_left(const bstrbuf *string_buffer) {
+    return string_buffer->cap - string_buffer->size;
+}
+
 void bstrbuf_inc_to_fit(bstrbuf *string_buffer, size_t size_to_fit) {
     if (!string_buffer->valid) {
         return;
@@ -253,8 +262,12 @@ void bstrbuf_inc_to_fit(bstrbuf *string_buffer, size_t size_to_fit) {
     }
 }
 
-void bstrbuf_append(bstrbuf *string_buffer, bstr string) {
-    if (string_buffer->cap - string_buffer->size < string.size) {
+void bstrbuf_prepend(bstrbuf *string_buffer, bstr string) {
+    bstrbuf_insert(string_buffer, string, 0);
+}
+
+void bstrbuf_append(bstrbuf *string_buffer, bstr string) { /* faster than insert */
+    if (bstrbuf_space_left(string_buffer) < string.size) {
         bstrbuf_inc_to_fit(string_buffer, string.size);
     }
     if (!string_buffer->valid) {
@@ -265,7 +278,9 @@ void bstrbuf_append(bstrbuf *string_buffer, bstr string) {
 }
 
 void bstrbuf_insert(bstrbuf *string_buffer, bstr string, size_t index) {
-    bstrbuf_inc_to_fit(string_buffer, string.size);
+    if (bstrbuf_space_left(string_buffer) < string.size) {
+        bstrbuf_inc_to_fit(string_buffer, string.size);
+    }
     if (index < 0) {
         index = 0;
     } else if (index > string_buffer->size) {

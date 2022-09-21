@@ -7,11 +7,8 @@ typedef long unsigned int size_t;
 typedef _Bool bool;
 #define true 1;
 #define false 0;
-
 #define bstr_fmt "%.*s"
 #define bstr_arg(bstr) (int)(bstr).size, (bstr).data
-
-#define BSTRBUF_REALLOC_INC 2
 
 typedef void *(*allocator_cb)(size_t);
 typedef void *(*reallocator_cb)(void *, size_t);
@@ -41,6 +38,7 @@ bstr    bstr_cstr(const char *data);
 void    bstr_print(const bstr);
 void    bstr_print_dbg(const bstr);
 size_t  bstr_strlen(bstr string);
+bool    bstr_valid(bstr string);
 bool    bstr_eq(bstr a, bstr b);
 bool    bstr_eq_ignorecase(bstr a, bstr b);
 bool    bstr_contains(bstr string, bstr substring);
@@ -64,10 +62,23 @@ bstr    bstr_chop_impl2(bstr *string, const char *delim);
             char*:       bstr_chop_impl2,                       \
             default:     bstr_chop_impl1)(string, delim)
 
+#define concat_impl(a, b) a##b
+#define concat(a, b)      concat_impl(a, b)
+#define macro_var(X) concat(macro_gen_var, concat(X, __LINE__))
+
+#define for_bstr_chop(iter, string, delim)                  \
+    bstr macro_var(string_) = string;                           \
+    bstr iter = bstr_chop(&macro_var(string_), delim);          \
+    bstr macro_var(delim_) = delim;                             \
+    for (; bstr_valid(iter); iter = bstr_chop(&macro_var(string_), macro_var(delim_)))
+
+
 /* bstrbuf */
 bstrbuf bstrbuf_make(size_t initial_capacity, alloc allocator);
 bstrbuf bstrbuf_copy(bstrbuf buffer, alloc allocator);
 void    bstrbuf_free(bstrbuf *string_buffer);
+size_t  bstrbuf_space_left(const bstrbuf *string_buffer);
+void    bstrbuf_prepend(bstrbuf *string_buffer, bstr string);
 void    bstrbuf_append(bstrbuf *string_buffer, bstr string);
 void    bstrbuf_insert(bstrbuf *string_buffer, bstr string, size_t index);
 void    bstrbuf_remove(bstrbuf *string_buffer, size_t from, size_t to);

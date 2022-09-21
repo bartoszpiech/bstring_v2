@@ -26,21 +26,9 @@ alloc myalloc = {
 };
 
 int main() {
-    bstr c = bstr_cstr("alamakota");
-    bstrbuf buffer = bstrbuf_make(2, myalloc);
-    bstrbuf b2 = bstrbuf_copy(buffer, myalloc);
-    bstrbuf_append(&buffer, c);
-    bstr_print(c);
-    bstrbuf_print(buffer);
-    bstrbuf_print(b2);
-
-
-    buffer.data[0] = 'X';
-    b2.data[0] = 'Y';
-    bstrbuf_print(buffer);
-    bstrbuf_print(b2);
-
-    bstrbuf_free(&buffer);
-    bstrbuf_free(&b2);
+    bstr c = bstr_cstr("21/09/22");
+    for_bstr_chop(it, c, bstr_cstr("/")) {
+        bstr_print(it);
+    }
     return 0;
 }
