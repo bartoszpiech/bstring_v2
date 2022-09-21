@@ -66,7 +66,7 @@ bstr    bstr_chop_impl2(bstr *string, const char *delim);
 #define concat(a, b)      concat_impl(a, b)
 #define macro_var(X) concat(macro_gen_var, concat(X, __LINE__))
 
-#define for_bstr_chop(iter, string, delim)                  \
+#define for_bstr_chop(iter, string, delim)                      \
     bstr macro_var(string_) = string;                           \
     bstr iter = bstr_chop(&macro_var(string_), delim);          \
     bstr macro_var(delim_) = delim;                             \
@@ -84,5 +84,7 @@ void    bstrbuf_insert(bstrbuf *string_buffer, bstr string, size_t index);
 void    bstrbuf_remove(bstrbuf *string_buffer, size_t from, size_t to);
 void    bstrbuf_print(const bstrbuf b);
 bstr    bstrbuf_to_bstr(const bstrbuf b);  /* beware freeing bstrbuf makes bstr owned */
+/* TODO */
+void    bstrbuf_replace(bstrbuf *string_buffer, bstr original, bstr replacement);
 
 #endif // _BSTRING_H_

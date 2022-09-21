@@ -325,3 +325,11 @@ bstr bstrbuf_to_bstr(const bstrbuf b) {
     }
     return result;
 }
+
+void bstrbuf_replace(bstrbuf *string_buffer, bstr original, bstr replacement) {
+    if (!bstrbuf_space_left(string_buffer) < replacement.size - original.size) {
+        bstrbuf_inc_to_fit(string_buffer, replacement.size - original.size);
+    }
+    bstr t
+        /* TODO */
+}
