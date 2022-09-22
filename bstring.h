@@ -84,7 +84,7 @@ void    bstrbuf_insert(bstrbuf *string_buffer, bstr string, size_t index);
 void    bstrbuf_remove(bstrbuf *string_buffer, size_t from, size_t to);
 void    bstrbuf_print(const bstrbuf b);
 bstr    bstrbuf_to_bstr(const bstrbuf b);  /* beware freeing bstrbuf makes bstr owned */
-/* TODO */
-void    bstrbuf_replace(bstrbuf *string_buffer, bstr original, bstr replacement);
+int     bstrbuf_replace_first(bstrbuf *string_buffer, bstr original, bstr replacement); /* replaces first occurence and returns its previous index, if not found returns -1 */
+size_t  bstrbuf_replace_all(bstrbuf *string_buffer, bstr original, bstr replacement); /* replaces all occurences and returns number of replacements */
 
 #endif // _BSTRING_H_

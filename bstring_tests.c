@@ -26,9 +26,18 @@ alloc myalloc = {
 };
 
 int main() {
-    bstr c = bstr_cstr("21/09/22");
+    bstr c = bstr_cstr("09/09/09");
+    bstrbuf cbuf = bstrbuf_make(16, myalloc);
+    bstrbuf_append(&cbuf, c);
+    /*
     for_bstr_chop(it, c, bstr_cstr("/")) {
         bstr_print(it);
     }
+    */
+    size_t r = bstrbuf_replace_all(&cbuf, bstr_cstr("09"), bstr_cstr("HALO"));
+    printf("%ld\n", r);
+    bstrbuf_print(cbuf);
+    bstrbuf_free(&cbuf);
+
     return 0;
 }

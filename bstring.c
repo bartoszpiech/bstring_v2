@@ -326,10 +326,24 @@ bstr bstrbuf_to_bstr(const bstrbuf b) {
     return result;
 }
 
-void bstrbuf_replace(bstrbuf *string_buffer, bstr original, bstr replacement) {
-    if (!bstrbuf_space_left(string_buffer) < replacement.size - original.size) {
+int bstrbuf_replace_first(bstrbuf *string_buffer, bstr original, bstr replacement) {
+    if (bstrbuf_space_left(string_buffer) < replacement.size - original.size) {
         bstrbuf_inc_to_fit(string_buffer, replacement.size - original.size);
     }
-    bstr t
-        /* TODO */
+    bstr buffer = bstrbuf_to_bstr(*string_buffer);
+    int org_index = bstr_index(buffer, original);
+    if (org_index >= 0) {
+        bstrbuf_remove(string_buffer, org_index, org_index + original.size);
+        bstrbuf_insert(string_buffer, replacement, org_index);
+    }
+    return org_index;
+}
+
+size_t bstrbuf_replace_all(bstrbuf *string_buffer, bstr original, bstr replacement) {
+    size_t replacements;
+    for (replacements = 0;
+         bstrbuf_replace_first(string_buffer, original, replacement) >= 0;
+         replacements++
+         ) {}
+    return replacements;
 }
