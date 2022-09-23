@@ -327,13 +327,14 @@ bstr bstrbuf_to_bstr(const bstrbuf b) {
 }
 
 int bstrbuf_replace_first(bstrbuf *string_buffer, bstr original, bstr replacement) {
-    if (bstrbuf_space_left(string_buffer) < replacement.size - original.size) {
-        bstrbuf_inc_to_fit(string_buffer, replacement.size - original.size);
-    }
     bstr buffer = bstrbuf_to_bstr(*string_buffer);
     int org_index = bstr_index(buffer, original);
     if (org_index >= 0) {
         bstrbuf_remove(string_buffer, org_index, org_index + original.size);
+        if (bstrbuf_space_left(string_buffer) < replacement.size) {
+            printf("%ld %ld\n", bstrbuf_space_left(string_buffer), replacement.size);
+            bstrbuf_inc_to_fit(string_buffer, replacement.size - original.size);
+        }
         bstrbuf_insert(string_buffer, replacement, org_index);
     }
     return org_index;

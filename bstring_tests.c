@@ -34,7 +34,7 @@ int main() {
         bstr_print(it);
     }
     */
-    size_t r = bstrbuf_replace_all(&cbuf, bstr_cstr("09"), bstr_cstr("HALO"));
+    size_t r = bstrbuf_replace_first(&cbuf, bstr_cstr("09"), bstr_cstr("HALO"));
     printf("%ld\n", r);
     bstrbuf_print(cbuf);
     bstrbuf_free(&cbuf);
