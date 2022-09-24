@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 
+/* private */
 size_t cstrlen(const char *cstr) {
     if (cstr == NULL) {
         fprintf(stderr, "Error (cstrlen), cstring is NULL!\n");
@@ -213,6 +214,37 @@ double bstr_to_double(bstr string) {
         }
     }
     return res * minus;
+}
+
+size_t bstr_count_fields(bstr string, char open_bracket, char close_bracket) {
+    size_t result = 0;
+    enum state {
+        BEFORE_OB,
+        AT_OB,
+        BEFORE_CB,
+        AT_CB,
+    };
+    enum state s = BEFORE_CB;
+    for (size_t i = 0; i < string.size; i++) {
+        if (s == BEFORE_OB) {
+            if (string.data[i] == open_bracket) {
+                s = AT_OB;
+            }
+        }
+        if (s == AT_OB) {
+            s = BEFORE_CB;
+        }
+        if (s == BEFORE_CB) {
+            if (string.data[i] == close_bracket) {
+                s = AT_CB;
+            }
+        }
+        if (s == AT_CB) {
+            s = BEFORE_OB;
+            result++;
+        }
+    }
+    return result;
 }
 
 /* bstrbuf */

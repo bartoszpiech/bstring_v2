@@ -20,6 +20,14 @@ typedef struct allocator {
     free_cb free;
 } alloc;
 
+/* add ifdef stdlib.h */
+//#ifdef 
+alloc gnu_alloc = {
+    .malloc = malloc,
+    .realloc = realloc,
+    .free = free
+};
+
 typedef struct bstring {
     size_t size;
     char *data;
@@ -72,6 +80,14 @@ bstr    bstr_chop_impl2(bstr *string, const char *delim);
     bstr macro_var(delim_) = delim;                             \
     for (; bstr_valid(iter); iter = bstr_chop(&macro_var(string_), macro_var(delim_)))
 
+/* optional bstr functions */
+/*!
+ * function that counts fields inside bstr. An example of the field is:
+ * ...{...}...
+ * it takes the string, open and closing brackets as arguments
+ * returns amount of fields 
+ */
+size_t  bstr_count_fields(bstr string, char open_bracket, char close_bracket);
 
 /* bstrbuf */
 bstrbuf bstrbuf_make(size_t initial_capacity, alloc allocator);
